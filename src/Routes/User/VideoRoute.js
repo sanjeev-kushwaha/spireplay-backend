@@ -5,7 +5,7 @@ import { mergeChunks } from "../../Utils/mergeChunks.js";
 
 const router = express.Router();
 
-router.post("/upload-chunk", uploadChunk.single("file"), (req, res) => {
+router.post("/upload-chunk", uploadChunk.single("video"), (req, res) => {
   res.status(200).json({ message: "Chunk uploaded" });
 });
 
@@ -20,5 +20,6 @@ router.post("/merge-chunks", async (req, res) => {
     res.status(500).json({ message: "Merge failed", error: err.message });
   }
 });
+
 
 export default router;

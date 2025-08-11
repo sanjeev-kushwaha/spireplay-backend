@@ -1,4 +1,4 @@
-import Model from " ../Models/VideoModel.js";
+import Model from "../Models/VideoModel.js";
 
 export const getAll = async () => {
   try {
@@ -11,7 +11,7 @@ export const getAll = async () => {
 
 export const single = async (id) => {
   try {
-    const video = await Model.findById({ id, deleted: false });
+    const video = await Model.findOne({ _id:id, deleted: false });
     if (!video || video.deleted) {
       throw new Error("Video not found");
     }
@@ -33,11 +33,11 @@ export const create = async (videoData) => {
 
 export const update = async (id, videoData) => {
   try {
-    const updatedVideo = await Model.findByIdAndUpdate(id, videoData, {
+    const updatedVideo = await Model.findOneAndUpdate({_id: id, deleted: false }, videoData, {
       new: true,
       runValidators: true,
     });
-    if (!updatedVideo || updatedVideo.deleted) {
+    if (!updatedVideo) {
       throw new Error("Video not found");
     }
     return updatedVideo;
