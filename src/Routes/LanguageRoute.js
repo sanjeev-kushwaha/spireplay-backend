@@ -1,23 +1,28 @@
-import express from "express"
+import express from "express";
 
-import { createLanguage, deleteLanguage, getAllLanguages, getLanguageById, updateLanguage } from "../Controllers/LanguageController.js";
-
+import {
+  createLanguage,
+  deleteLanguage,
+  getAllLanguages,
+  getLanguageById,
+  updateLanguage,
+} from "../Controllers/LanguageController.js";
 
 const router = express.Router();
 
 //Get all Language
-router.get("/", getAllLanguages)
+router.get("/", getAllLanguages);
 
 //Get Language by Id
-router.get("/:id", getLanguageById)
+router.get("/:id", getLanguageById);
 
 //Create Language
-router.post("/", createLanguage)
+router.post("/", createLanguage);
 
 //Update Language
-router.put("/:id", updateLanguage)
+router.put("/:id", updateLanguage);
 
 //Soft Delete Language
-router.delete("/:id", deleteLanguage)
+router.delete("/:id", deleteLanguage);
 
 export default router;

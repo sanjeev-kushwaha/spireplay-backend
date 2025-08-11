@@ -1,6 +1,11 @@
 import express from "express";
-import { createCategory, deleteCategory, getAllCategories, getCategoryById, updateCategory } from "../Controllers/CategoryController.js";
-
+import {
+  createCategory,
+  deleteCategory,
+  getAllCategories,
+  getCategoryById,
+  updateCategory,
+} from "../Controllers/CategoryController.js";
 
 const router = express.Router();
 
@@ -8,16 +13,15 @@ const router = express.Router();
 router.get("/", getAllCategories);
 
 //Get category by id
-router.get("/:id", getCategoryById)
+router.get("/:id", getCategoryById);
 
 //Create category
-router.post("/", createCategory)
+router.post("/", createCategory);
 
 // Update category
-router.put("/:id",updateCategory);
+router.put("/:id", updateCategory);
 
 // Soft     delete category
 router.delete("/:id", deleteCategory);
-
 
 export default router;
