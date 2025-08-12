@@ -45,6 +45,10 @@ import Uploder from "./Routes/User/UploadRoute.js";
 
 import CategoryRoute from "./Routes/CategoryRoute.js"
 import LanguageRoute from "./Routes/LanguageRoute.js"
+import VideoTypeRoute from "./Routes/VideoTypeRoute.js"
+import VideosRoute from "./Routes/VideoRoute.js"
+import SubscriptionPlanRoute  from "./Routes/SubscriptionPlanRoute.js"
+
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -71,11 +75,16 @@ app.use(adminUrl, Uploder);
 
 const categoryUrl = "/api/category";
 const languageUrl = "/api/language";
+const videoTypeUrl = "/api/videoType";
+const videoUrl = "/api/video";
+const subscriptionPlanUrl = "/api/subscriptionPlans";
 app.use(categoryUrl, CategoryRoute)
 app.use(adminUrl, subscriptionRoute);
 app.use(authUrl, AuthRoute);
 app.use(languageUrl, LanguageRoute)
 app.use(userUrl, UserPlanRoute);
 app.use(userUrl, VideoRoute);
-
+app.use(videoTypeUrl, VideoTypeRoute)
+app.use(videoUrl, VideosRoute )
+app.use(subscriptionPlanUrl, SubscriptionPlanRoute)
 export default app;
