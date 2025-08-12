@@ -1,23 +1,24 @@
 import SubscriptionPlan from "../Models/SubscriptionPlanModel.js";
-import mongoose from "mongoose";
 
-export const getPlans = async () => {
+export const getPlans = async (req, res) => {
   try {
-    return await SubscriptionPlan.find({ deleted: false });
+    const plansData = await SubscriptionPlan.find({ deleted: false });
+    return plansData;
   } catch (error) {
-    console.error("Error fetching plans:", error);
-    throw new Error("Internal server error" + error.message);
+    console.error("Error Fetching plans : ", error);
+    throw new Error("Internal server error");
   }
 };
 
 export const getPlanById = async (planId) => {
   try {
-    if (!mongoose.isValidObjectId(planId)) {
-      throw new Error("Invalid Plan ID");
-    }
-    return await SubscriptionPlan.findOne({ _id: planId, deleted: false });
+    const planData = await SubscriptionPlan.findOne(
+      { _id: planId },
+      { deleted: false }
+    );
+    return planData;
   } catch (error) {
-    console.error("Error fetching single plan:", error);
+    console.error("Error fetching single plan : ", error);
     throw new Error("Internal server error");
   }
 };
@@ -28,14 +29,11 @@ export const createPlan = async (requestedData) => {
     return await newPlan.save();
   } catch (error) {
     console.error("Error in createPlan:", error.message);
-    throw new Error(`Internal server error: ${error.message}`);
+    throw new Error("Internal server error", error.message);
   }
 };
 
 export const updatePlanService = async (planId, updateData) => {
-  if (!mongoose.isValidObjectId(planId)) {
-    throw new Error("Invalid Plan ID");
-  }
   if (!updateData || Object.keys(updateData).length === 0) {
     throw new Error("No data provided for update");
   }
@@ -54,9 +52,7 @@ export const updatePlanService = async (planId, updateData) => {
 };
 
 export const deletePlanService = async (planId) => {
-  if (!mongoose.isValidObjectId(planId)) {
-    throw new Error("Invalid Plan ID");
-  }
+  if (!planId) throw new Error("Plan ID is required");
 
   const updated = await SubscriptionPlan.findOneAndUpdate(
     { _id: planId, deleted: false },
