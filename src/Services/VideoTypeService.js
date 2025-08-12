@@ -11,7 +11,7 @@ export const getAll = async () => {
 
 export const single = async (id) => {
   try {
-    const videoType = await Model.findById({_id: id, deleted: false });
+    const videoType = await Model.findById(id);
     if (!videoType || videoType.deleted) {
       throw new Error("Video Type not found");
     }

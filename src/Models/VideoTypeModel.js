@@ -1,15 +1,10 @@
 import mongoose from "mongoose";
 
-const videoTypeSchma = new mongoose.Schema({
+const videoTypeSchma = new mongoose.schema({
   videoType: {
     type: String,
     required: true,
     enum: ["movie", "series", "documentary", "shortFilm"],
-    
-  },
-  deleted: {
-    type: Boolean,
-    default: false,
   },
 });
 
