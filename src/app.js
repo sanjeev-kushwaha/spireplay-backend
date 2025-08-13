@@ -43,8 +43,12 @@ import UserPlanRoute from "./Routes/User/UserPlanRoute.js";
 import VideoRoute from "./Routes/User/VideoRoute.js";
 import Uploder from "./Routes/User/UploadRoute.js";
 
-import CategoryRoute from "./Routes/CategoryRoute.js"
-import LanguageRoute from "./Routes/LanguageRoute.js"
+import CategoryRoute from "./Routes/CategoryRoute.js";
+import LanguageRoute from "./Routes/LanguageRoute.js";
+import VideoTypeRoute from "./Routes/VideoTypeRoute.js";
+import VideosRoute from "./Routes/VideoRoute.js";
+// import SubscriptionPlanRoute from "./Routes/SubscriptionPlanRoute.js";
+
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -66,16 +70,28 @@ app.use(
 const authUrl = "/api/auth";
 const adminUrl = "/api/admin";
 const userUrl = "/api/user";
+const common = "/api";
+
+// const categoryUrl = "/api/category";
+// const languageUrl = "/api/language";
+// const videoTypeUrl = "/api/videoType";
+// const videoUrl = "/api/video";
+// const subscriptionPlanUrl = "/api/subscriptionPlans";
 
 app.use(adminUrl, Uploder);
 
-const categoryUrl = "/api/category";
-const languageUrl = "/api/language";
-app.use(categoryUrl, CategoryRoute)
+// const categoryUrl = "/api/category";
+// const languageUrl = "/api/language";
+
 app.use(adminUrl, subscriptionRoute);
 app.use(authUrl, AuthRoute);
-app.use(languageUrl, LanguageRoute)
 app.use(userUrl, UserPlanRoute);
 app.use(userUrl, VideoRoute);
+
+app.use(adminUrl, LanguageRoute);
+app.use(common, CategoryRoute);
+app.use(common, VideoTypeRoute);
+app.use(userUrl, VideosRoute);
+// app.use(subscriptionPlanUrl, SubscriptionPlanRoute)
 
 export default app;

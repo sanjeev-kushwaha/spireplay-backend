@@ -1,4 +1,4 @@
-import Model from " ../Models/VideoModel.js";
+import Model from "../Models/VideoModel.js";
 
 export const getAll = async () => {
   try {
@@ -47,23 +47,17 @@ export const update = async (id, videoData) => {
 };
 
 export const remove = async (id) => {
-    try {
-        const deletedVideo = await Model.findByIdAndUpdate(
-            id,
-            { deleted: true },
-            { new: true }
-        );
-        if (!deletedVideo || !deletedVideo.deleted) {
-            throw new Error("Video not found");
-        }
-        return deletedVideo;
-    } catch (error) {
-        throw new Error("Error deleting Video: " + error.message);
+  try {
+    const deletedVideo = await Model.findByIdAndUpdate(
+      id,
+      { deleted: true },
+      { new: true }
+    );
+    if (!deletedVideo || !deletedVideo.deleted) {
+      throw new Error("Video not found");
     }
+    return deletedVideo;
+  } catch (error) {
+    throw new Error("Error deleting Video: " + error.message);
+  }
 };
-
-
-
-
-
-

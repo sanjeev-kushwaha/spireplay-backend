@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Video Player — API-driven</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#111; color:#eee; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+    .player { width: 90%; max-width: 900px; }
+    video { width:100%; border-radius:8px; background:#000; display:block; }
+    .meta { display:flex; gap:12px; align-items:center; margin-top:8px; }
+    .meta .title { font-weight:700; font-size:1.05rem; }
+    .controls { display:flex; gap:8px; align-items:center; margin-left:auto; }
+    .progress { width:220px; }
+    .status { margin-top:6px; font-size:0.9rem; color:#aaa; }
+    button { background:#222; color:#fff; border:none; padding:8px 10px; border-radius:6px; cursor:pointer; }
+    button:hover { filter:brightness(1.15) }
+  </style>
+</head>
+<body>
+  <div class="player">
+    <video id="video" controls preload="metadata" poster="" crossorigin="anonymous"></video>
+
+    <div class="meta">
+      <div class="title" id="title">Loading...</div>
+      <div class="controls">
+        <button id="playBtn">Play / Pause</button>
+        <input id="seek" class="progress" type="range" min="0" max="100" value="0" />
+      </div>
+    </div>
+    <div class="status" id="status">Initializing...</div>
+  </div>
+
+  <script>
+    // ========== CONFIG ==========
+    // Base URL where your uploads are served (no trailing slash)
+    const BASE_URL = "http://localhost:8400/"; // <-- set to your base (e.g., https://mysite.com)
+    // URL of your API that returns the JSON (adjust to your actual endpoint)
+    const API_URL = "uploads/videos/Qayamat - Housefull 5 ft Akshay Kumar_HD_720p-(PagalWorld.video).mp4"; // <-- change to your API path or full URL
+    // ============================
+
+    const videoEl = document.getElementById('video');
+    const titleEl = document.getElementById('title');
+    const statusEl = document.getElementById('status');
+    const playBtn = document.getElementById('playBtn');
+    const seek = document.getElementById('seek');
+
+    playBtn.addEventListener('click', () => {
+      if (videoEl.paused) videoEl.play(); else videoEl.pause();
+    });
+
+    // Update seek bar as video plays
+    videoEl.addEventListener('timeupdate', () => {
+      if (videoEl.duration) {
+        seek.value = (videoEl.currentTime / videoEl.duration) * 100;
+      }
+    });
+
+    seek.addEventListener('input', () => {
+      if (videoEl.duration) {
+        videoEl.currentTime = (seek.value / 100) * videoEl.duration;
+      }
+    });
+
+    // Fetch the video metadata JSON
+    async function init() {
+      statusEl.textContent = 'Fetching video metadata...';
+      try {
+        const res = await fetch(API_URL, { credentials: 'same-origin' });
+        if (!res.ok) throw new Error(`API error ${res.status}`);
+        const data = await res.json();
+
+        titleEl.textContent = data.title || 'Untitled';
+        if (data.thumbnail) {
+          videoEl.setAttribute('poster', data.thumbnail);
+        }
+
+        if (!data.videoUrl) throw new Error('videoUrl missing in API response');
+
+        // Build full URL (ensure encoded)
+        const fullUrl = (BASE_URL.replace(/\/$/, '')) + '/' + encodeURI(data.videoUrl.replace(/^\/+/, ''));
+
+        statusEl.textContent = 'Checking how the server serves the file...';
+
+        // Try HEAD request first to inspect headers (CORS must allow HEAD)
+        let headOk = false, disposition = null;
+        try {
+          const headResp = await fetch(fullUrl, { method: 'HEAD', mode: 'cors' });
+          if (headResp.ok) {
+            headOk = true;
+            disposition = headResp.headers.get('Content-Disposition') || '';
+            // If server gives a video content-type, prefer direct src
+            const ctype = headResp.headers.get('Content-Type') || '';
+            console.log('HEAD content-type:', ctype, 'disposition:', disposition);
+          }
+        } catch (e) {
+          // HEAD might be blocked by CORS — ignore and try direct
+          console.warn('HEAD failed', e);
+        }
+
+        // If Content-Disposition suggests attachment, fallback to blob-download approach
+        const looksLikeAttachment = disposition.toLowerCase().includes('attachment');
+
+        if (!looksLikeAttachment) {
+          // First try: set video src directly (best for streaming / range requests)
+          statusEl.textContent = 'Setting video source directly (preferred).';
+          videoEl.src = fullUrl;
+          videoEl.load();
+
+          // Listen for errors (if server forces download, browser may error)
+          videoEl.addEventListener('error', async function handler() {
+            console.warn('Video element error — falling back to blob approach');
+            videoEl.removeEventListener('error', handler);
+            await fallbackToBlob(fullUrl);
+          });
+
+          // If playback becomes possible, update status
+          videoEl.addEventListener('canplay', () => {
+            statusEl.textContent = 'Playing directly from server.';
+          }, { once: true });
+
+          // If server explicitly says attachment, do fallback now
+          if (looksLikeAttachment) {
+            console.log('Server header indicates attachment — using blob fallback');
+            await fallbackToBlob(fullUrl);
+          }
+        } else {
+          // Force blob fallback
+          await fallbackToBlob(fullUrl);
+        }
+
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    // Fetch file as blob and create objectURL (browser must download entire file)
+    async function fallbackToBlob(url) {
+      statusEl.textContent = 'Downloading video as blob (fallback). This will download the entire file before playback.';
+      try {
+        const resp = await fetch(url, { mode: 'cors' });
+        if (!resp.ok) throw new Error(`Failed to download file (${resp.status})`);
+        // show progress if available
+        const contentLength = resp.headers.get('Content-Length');
+        if (!resp.body || !contentLength) {
+          // no streaming reader available, just blob()
+          const blob = await resp.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          videoEl.src = blobUrl;
+          videoEl.load();
+          statusEl.textContent = 'Loaded blob — ready to play.';
+          return;
+        }
+
+        // streaming read to show progress (still must download fully before play)
+        const total = parseInt(contentLength, 10);
+        const reader = resp.body.getReader();
+        let received = 0;
+        const chunks = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          received += value.length;
+          statusEl.textContent = `Downloading... ${(received / total * 100).toFixed(1)}%`;
+        }
+        const blob = new Blob(chunks);
+        const blobUrl = URL.createObjectURL(blob);
+        videoEl.src = blobUrl;
+        videoEl.load();
+        statusEl.textContent = 'Blob loaded — ready to play.';
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = 'Fallback failed: ' + e.message;
+      }
+    }
+
+    // Start
+    init();
+  </script>
+</body>
+</html>

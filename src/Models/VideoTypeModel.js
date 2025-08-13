@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const videoTypeSchma = new mongoose.schema({
+const videoTypeSchma = new mongoose.Schema({
   videoType: {
     type: String,
     required: true,
