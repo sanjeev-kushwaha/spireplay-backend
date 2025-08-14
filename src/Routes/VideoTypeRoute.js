@@ -10,17 +10,17 @@ import {
 const router = express.Router();
 
 //Get all VideoType
-router.get("/", getAllVideoType);
+router.get("/videoType", getAllVideoType);
 
 //Get VideoType by Id
-router.get("/:id", getVideoTypeById);
+router.get("/videoType/:id", getVideoTypeById);
 
 //Create VideoType
-router.post("/", creatVideoType);
+router.post("/videoType", creatVideoType);
 
 //Update VideoType
-router.put("/:id", updateVideoType);
+router.put("/videoType/:id", updateVideoType);
 
 //Soft Delete VideType
-router.delete("/:id", deleteVideoType);
+router.delete("/videoType/:id", deleteVideoType);
 export default router;

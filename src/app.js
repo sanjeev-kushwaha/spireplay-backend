@@ -88,7 +88,7 @@ app.use(authUrl, AuthRoute);
 app.use(userUrl, UserPlanRoute);
 app.use(userUrl, VideoRoute);
 
-app.use(adminUrl, LanguageRoute);
+app.use(common, LanguageRoute);
 app.use(common, CategoryRoute);
 app.use(common, VideoTypeRoute);
 app.use(userUrl, VideosRoute);

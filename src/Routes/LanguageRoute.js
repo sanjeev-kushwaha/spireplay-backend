@@ -11,18 +11,18 @@ import {
 const router = express.Router();
 
 //Get all Language
-router.get("/", getAllLanguages);
+router.get("/language", getAllLanguages);
 
 //Get Language by Id
-router.get("/:id", getLanguageById);
+router.get("/language/:id", getLanguageById);
 
 //Create Language
-router.post("/", createLanguage);
+router.post("/language", createLanguage);
 
 //Update Language
-router.put("/:id", updateLanguage);
+router.put("/language/:id", updateLanguage);
 
 //Soft Delete Language
-router.delete("/:id", deleteLanguage);
+router.delete("/language/:id", deleteLanguage);
 
 export default router;
